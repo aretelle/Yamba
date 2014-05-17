@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.util.Log;
 
 import com.twitter.university.android.yamba.R;
-import com.twitter.university.android.yamba.YambaApplication;
 
 
 public class YambaService extends IntentService {
@@ -64,9 +63,7 @@ public class YambaService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        helper = new YambaLogic(
-            (YambaApplication) getApplication(),
-            getResources().getInteger(R.integer.poll_max));
+        helper = new YambaLogic(this);
     }
 
     @Override

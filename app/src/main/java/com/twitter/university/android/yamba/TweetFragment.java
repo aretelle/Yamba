@@ -15,8 +15,6 @@ import com.twitter.university.android.yamba.svc.YambaService;
 
 
 public class TweetFragment extends Fragment {
-    private static final String TAG = "TWEET";
-
     private int okColor;
     private int warnColor;
     private int errColor;
