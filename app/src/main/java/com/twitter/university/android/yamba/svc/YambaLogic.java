@@ -1,6 +1,7 @@
 package com.twitter.university.android.yamba.svc;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.database.Cursor;
 import android.os.Handler;
 import android.os.Message;
@@ -25,32 +26,18 @@ class YambaLogic {
 
     private final YambaApplication app;
     private final int maxPolls;
-    private final Handler hdlr;
 
     // Must be called from the UI thread
     public YambaLogic(final YambaApplication app, int maxPolls) {
         this.app = app;
         this.maxPolls = maxPolls;
-        hdlr = new Handler() {
-            @Override
-            public void handleMessage(Message msg) {
-                switch (msg.what) {
-                    case OP_TOAST:
-                        Toast.makeText(app, msg.arg1, Toast.LENGTH_LONG).show();
-                        break;
-                }
-            }
-        };
     }
 
     public void doPost(String tweet) {
-        int msg = R.string.tweet_succeeded;
-        try { app.getClient().postStatus(tweet); }
-        catch (YambaClientException e) {
-                Log.e(TAG, "post failed", e);
-                msg = R.string.tweet_failed;
-            }
-        hdlr.obtainMessage(OP_TOAST, msg, 0).sendToTarget();
+        ContentValues cv = new ContentValues();
+        cv.put(YambaContract.Posts.Columns.TWEET, tweet);
+        cv.put(YambaContract.Posts.Columns.TIMESTAMP, System.currentTimeMillis());
+        app.getContentResolver().insert(YambaContract.Posts.URI, cv);
     }
 
     public void doPoll() {

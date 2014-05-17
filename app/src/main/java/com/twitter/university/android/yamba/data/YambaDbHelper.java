@@ -7,13 +7,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 class YambaDbHelper extends SQLiteOpenHelper {
     private static final String DB_FILE = "yamba.db";
-    private static final int VERSION = 1;
+    private static final int VERSION = 2;
 
     public static final String TABLE_TIMELINE = "timeline";
-    public static final String COL_ID = "id";
+    public static final String COL_ID = "p_id";
     public static final String COL_TIMESTAMP = "p_timestamp";
     public static final String COL_HANDLE = "p_handle";
     public static final String COL_TWEET = "p_tweet";
+
+    static final String TABLE_POSTS = "p_posts";
+    static final String COL_XACT = "p_xact";
+    static final String COL_SENT = "p_sent";
 
 
     public YambaDbHelper(Context ctxt) {
@@ -29,11 +33,19 @@ class YambaDbHelper extends SQLiteOpenHelper {
                 + COL_HANDLE + " TEXT NOT NULL,"
                 + COL_TWEET + " TEXT NOT NULL)"
             );
+        db.execSQL(
+            "CREATE TABLE " + TABLE_POSTS + "("
+                + COL_ID + " INTEGER PRIMARY KEY AUTOINCREMENT,"
+                + COL_TIMESTAMP + " INTEGER NOT NULL,"
+                + COL_XACT + " STRING DEFAULT(NULL),"
+                + COL_SENT + " INTEGER DEFAULT(NULL),"
+                + COL_TWEET + " STRING NOT NULL" + ")");
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
-        db.execSQL("DROP TABLE " + TABLE_TIMELINE);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_POSTS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TIMELINE);
         onCreate(db);
     }
 }
