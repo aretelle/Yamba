@@ -6,6 +6,8 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.os.Bundle;
 
+import com.twitter.university.android.yamba.svc.YambaService;
+
 
 public class TimelineActivity extends YambaActivity {
     private static final String DETAIL_FRAGMENT = "Timeline.DETAILS";
@@ -27,6 +29,18 @@ public class TimelineActivity extends YambaActivity {
         usingFragments = (null != findViewById(R.id.timeline_details));
 
         if (usingFragments) { addDetailFragment(); }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        YambaService.startPolling(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        YambaService.stopPolling(this);
     }
 
     private void addDetailFragment() {
