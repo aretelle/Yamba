@@ -2,55 +2,20 @@ package com.twitter.university.android.yamba;
 
 import android.app.Fragment;
 import android.content.res.Resources;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import com.marakana.android.yamba.clientlib.YambaClientException;
+import com.twitter.university.android.yamba.svc.YambaService;
 
 
 public class TweetFragment extends Fragment {
     private static final String TAG = "TWEET";
-
-    static final class Poster extends AsyncTask<String, Void, Integer> {
-        private final YambaApplication app;
-
-        public Poster(YambaApplication app) { this.app = app; }
-
-        @Override
-        protected Integer doInBackground(String... tweet) {
-            int msg = R.string.tweet_succeeded;
-            try { app.getClient().postStatus(tweet[0]); }
-            catch (YambaClientException e) {
-                Log.e(TAG, "post failed", e);
-                msg = R.string.tweet_failed;
-            }
-            return Integer.valueOf(msg);
-        }
-
-        @Override
-        protected void onPostExecute(Integer msg) {
-            cleanup(msg.intValue());
-        }
-
-        @Override
-        protected void onCancelled() {
-            cleanup(R.string.tweet_failed);
-        }
-
-        private void cleanup(int msg) {
-            Toast.makeText(app, msg, Toast.LENGTH_LONG).show();
-        }
-    }
-
 
     private int okColor;
     private int warnColor;
@@ -132,7 +97,7 @@ public class TweetFragment extends Fragment {
 
         tweetView.setText("");
 
-        new Poster((YambaApplication) getActivity().getApplication()).execute();
+        YambaService.postTweet(getActivity(), tweet);
     }
 
     private boolean checkTweetLen(int n) {

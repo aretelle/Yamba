@@ -16,8 +16,18 @@ public class YambaService extends IntentService {
 
     private static final String PARAM_OP = "YambaService.OP";
     private static final int OP_POLL = -1;
+    private static final int OP_POST = -2;
+
+    private static final String PARAM_TWEET = "YambaService.TWEET";
 
     private static final int POLL_REQ = 42;
+
+    public static void postTweet(Context ctxt, String tweet) {
+        Intent i = new Intent(ctxt, YambaService.class);
+        i.putExtra(PARAM_OP, OP_POST);
+        i.putExtra(PARAM_TWEET, tweet);
+        ctxt.startService(i);
+    }
 
     public static void startPolling(Context ctxt) {
         Log.d(TAG, "Polling started");
@@ -65,6 +75,10 @@ public class YambaService extends IntentService {
         switch(op) {
             case OP_POLL:
                 helper.doPoll();
+                break;
+
+            case OP_POST:
+                helper.doPost(intent.getStringExtra(PARAM_TWEET));
                 break;
 
             default:
