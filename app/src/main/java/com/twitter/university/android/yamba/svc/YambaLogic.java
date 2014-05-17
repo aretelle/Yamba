@@ -1,11 +1,13 @@
 package com.twitter.university.android.yamba.svc;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.util.Log;
 
 import com.marakana.android.yamba.clientlib.YambaClient.Status;
 import com.twitter.university.android.yamba.BuildConfig;
+import com.twitter.university.android.yamba.R;
 import com.twitter.university.android.yamba.YambaApplication;
 import com.twitter.university.android.yamba.YambaContract;
 
@@ -13,22 +15,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-class YambaLogic {
+public class YambaLogic {
     private static final String TAG = "LOGIC";
 
 
-    private final YambaApplication app;
+    private final Context ctxt;
     private final int maxPolls;
 
-    public YambaLogic(final YambaApplication app, int maxPolls) {
-        this.app = app;
-        this.maxPolls = maxPolls;
+    public YambaLogic(Context ctxt) {
+        this.ctxt = ctxt;
+        this.maxPolls = ctxt.getResources().getInteger(R.integer.poll_max);
     }
 
     public void doPoll() {
         Log.d(TAG, "poll");
         try {
-            parseTimeline(app.getClient().getTimeline(maxPolls));
+            parseTimeline(((YambaApplication) ctxt.getApplicationContext()).getClient().getTimeline(maxPolls));
         }
         catch (Exception e) {
             Log.e(TAG, "Poll failed: " + e, e);
@@ -53,7 +55,7 @@ class YambaLogic {
 
         int n = vals.size();
         if (0 >= n) { return 0; }
-        n = app.getContentResolver().bulkInsert(
+        n = ctxt.getContentResolver().bulkInsert(
             YambaContract.Timeline.URI,
             vals.toArray(new ContentValues[n]));
 
@@ -64,7 +66,7 @@ class YambaLogic {
     private long getMaxTimestamp() {
         Cursor c = null;
         try {
-            c = app.getContentResolver().query(
+            c = ctxt.getContentResolver().query(
                 YambaContract.MaxTimeline.URI,
                 null,
                 null,

@@ -37,6 +37,13 @@ public class YambaProvider extends ContentProvider {
             TIMELINE_DIR_TYPE);
     }
 
+    private static final Map<String, String> PROJ_MAP_MAX_TIMELINE = new ProjectionMap.Builder()
+        .addColumn(
+            YambaContract.MaxTimeline.Columns.TIMESTAMP,
+            "max(" + YambaDbHelper.COL_TIMESTAMP + ")")
+        .build()
+        .getProjectionMap();
+
     private static final ColumnMap COL_MAP_TIMELINE = new ColumnMap.Builder()
         .addColumn(
             YambaContract.Timeline.Columns.ID,
@@ -61,13 +68,6 @@ public class YambaProvider extends ContentProvider {
         .addColumn(YambaContract.Timeline.Columns.TIMESTAMP, YambaDbHelper.COL_TIMESTAMP)
         .addColumn(YambaContract.Timeline.Columns.HANDLE, YambaDbHelper.COL_HANDLE)
         .addColumn(YambaContract.Timeline.Columns.TWEET, YambaDbHelper.COL_TWEET)
-        .build()
-        .getProjectionMap();
-
-    private static final Map<String, String> PROJ_MAP_MAX_TIMELINE = new ProjectionMap.Builder()
-        .addColumn(
-            YambaContract.MaxTimeline.Columns.TIMESTAMP,
-            "max(" + YambaDbHelper.COL_TIMESTAMP + ")")
         .build()
         .getProjectionMap();
 
@@ -165,13 +165,13 @@ public class YambaProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri arg0, String arg1, String[] arg2) {
-        throw new UnsupportedOperationException("delete not supported");
+    public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
+        throw new UnsupportedOperationException("update not supported");
     }
 
     @Override
-    public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
-        throw new UnsupportedOperationException("update not supported");
+    public int delete(Uri arg0, String arg1, String[] arg2) {
+        throw new UnsupportedOperationException("delete not supported");
     }
 
     private SQLiteDatabase getDb() { return dbHelper.getWritableDatabase(); }

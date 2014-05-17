@@ -54,9 +54,7 @@ public class YambaService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        helper = new YambaLogic(
-            (YambaApplication) getApplication(),
-            getResources().getInteger(R.integer.poll_max));
+        helper = new YambaLogic(this);
     }
 
     @Override
