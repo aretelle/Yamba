@@ -1,88 +1,127 @@
 package com.twitter.university.android.yamba.svc;
 
-import android.app.AlarmManager;
-import android.app.IntentService;
-import android.app.PendingIntent;
-import android.content.Context;
+import android.app.Service;
 import android.content.Intent;
+import android.os.Binder;
+import android.os.Handler;
+import android.os.IBinder;
 import android.util.Log;
 
 import com.twitter.university.android.yamba.R;
-import com.twitter.university.android.yamba.YambaApplication;
+
+import java.lang.ref.WeakReference;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 
-public class YambaService extends IntentService {
+/**
+ * Created by bmeike on 5/16/14.
+ */
+public class YambaService extends Service {
     private static final String TAG = "SVC";
 
-    private static final String PARAM_OP = "YambaService.OP";
-    private static final int OP_POLL = -1;
-    private static final int OP_POST = -2;
+    private static final ScheduledExecutorService EXECUTOR = Executors.newScheduledThreadPool(3);
+    private static final AtomicInteger IN_QUEUE = new AtomicInteger();
 
-    private static final String PARAM_TWEET = "YambaService.TWEET";
 
-    private static final int POLL_REQ = 42;
+    public interface TweetCompleteListener { void onTweetComplete(int msg); }
 
-    public static void postTweet(Context ctxt, String tweet) {
-        Intent i = new Intent(ctxt, YambaService.class);
-        i.putExtra(PARAM_OP, OP_POST);
-        i.putExtra(PARAM_TWEET, tweet);
-        ctxt.startService(i);
+    public class SvcBinder extends Binder {
+        public YambaService getService() { return YambaService.this; }
     }
 
-    public static void startPolling(Context ctxt) {
-        Log.d(TAG, "Polling started");
-        long t = 1000 * ctxt.getResources().getInteger(R.integer.poll_interval);
-        ((AlarmManager) ctxt.getSystemService(Context.ALARM_SERVICE))
-            .setInexactRepeating(
-                AlarmManager.RTC,
-                System.currentTimeMillis() + 100,
-                t,
-                getPollingIntent(ctxt));
+    public abstract class Task<CALLBACK, RESPONSE> implements Runnable {
+        private final WeakReference<CALLBACK> callback;
+        private volatile boolean reqComplete;
+        private RESPONSE response;
+
+        protected abstract RESPONSE doRequest();
+        protected abstract void doResponse(CALLBACK callback, RESPONSE response);
+
+        public Task(CALLBACK callback) {
+            this.callback = new WeakReference<CALLBACK>(callback);
+        }
+
+        @Override
+        public void run() {
+            if (reqComplete) {
+                CALLBACK callback = this.callback.get();
+                if (null != callback) { doResponse(callback, response); }
+                return;
+            }
+
+            int n;
+            try {
+                n = IN_QUEUE.getAndIncrement();
+                if (0 == n) {
+                    YambaService.this.startService(new Intent(YambaService.this, YambaService.class));
+                }
+
+                try { response = doRequest(); }
+                finally { reqComplete = true; }
+
+                hdlr.post(this);
+            }
+            finally {
+                n = IN_QUEUE.decrementAndGet();
+                if (0 >= n) { YambaService.this.stopSelf(); }
+            }
+        }
     }
 
-    public static void stopPolling(Context ctxt) {
-        Log.d(TAG, "Polling stopped");
-        ((AlarmManager) ctxt.getSystemService(Context.ALARM_SERVICE))
-            .cancel(getPollingIntent(ctxt));
-    }
+    private final Handler hdlr = new Handler();
+    private final IBinder binder = new SvcBinder();
 
-    private static PendingIntent getPollingIntent(Context ctxt) {
-        Intent i = new Intent(ctxt, YambaService.class);
-        i.putExtra(PARAM_OP, OP_POLL);
-        return PendingIntent.getService(
-            ctxt,
-            POLL_REQ,
-            i,
-            PendingIntent.FLAG_UPDATE_CURRENT);
-    }
-
-
+    private volatile int pollInterval;
     private volatile YambaLogic helper;
 
-    public YambaService() { super(TAG); }
+    private ScheduledFuture<?> poller;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        helper = new YambaLogic(
-            (YambaApplication) getApplication(),
-            getResources().getInteger(R.integer.poll_max));
+        pollInterval = getResources().getInteger(R.integer.poll_interval);
+        helper = new YambaLogic(this);
     }
 
     @Override
-    protected void onHandleIntent(Intent intent) {
-        int op = intent.getIntExtra(PARAM_OP, 0);
-        switch(op) {
-            case OP_POLL:
-                helper.doPoll();
-                break;
+    public IBinder onBind(Intent intent) { return binder; }
 
-            case OP_POST:
-                helper.doPost(intent.getStringExtra(PARAM_TWEET));
-                break;
+    public void post(final String tweet, TweetCompleteListener listener) {
+        EXECUTOR.execute(
+            new Task<TweetCompleteListener, Integer>(listener) {
+                @Override
+                protected Integer doRequest() { return helper.doPost(tweet); }
 
-            default:
-                throw new IllegalArgumentException("Unrecognized op: " + op);
-        }
+                @Override
+                protected void doResponse(TweetCompleteListener cb, Integer resp) {
+                    cb.onTweetComplete(resp.intValue());
+                }
+            }
+        );
+    }
+
+    public synchronized void startPolling() {
+        if (null != poller) { return; }
+
+        poller = EXECUTOR.scheduleAtFixedRate(
+            new Runnable() {
+                @Override public void run() { helper.doPoll(); }
+            },
+            10,
+            pollInterval,
+            SECONDS);
+        Log.d(TAG, "Polling started");
+    }
+
+    public synchronized void stopPolling() {
+        if (null == poller) { return; }
+
+        poller.cancel(true);
+        Log.d(TAG, "Polling stopped");
     }
 }

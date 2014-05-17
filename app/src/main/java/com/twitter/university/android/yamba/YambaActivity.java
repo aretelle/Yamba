@@ -1,13 +1,19 @@
 package com.twitter.university.android.yamba;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
+import android.content.ServiceConnection;
+import android.os.IBinder;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.twitter.university.android.yamba.svc.YambaService;
 
-public abstract class YambaActivity extends Activity {
+
+public abstract class YambaActivity extends Activity implements ServiceConnection {
+    private YambaService service;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -40,6 +46,34 @@ public abstract class YambaActivity extends Activity {
 
         return true;
     }
+
+    @Override
+    public void onServiceConnected(ComponentName comp, IBinder binder) {
+        service = ((YambaService.SvcBinder) binder).getService();
+    }
+
+    @Override
+    public void onServiceDisconnected(ComponentName componentName) {
+        service = null;
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        unbindService(this);
+        service = null;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        bindService(
+            new Intent(this, YambaService.class),
+            this,
+            BIND_AUTO_CREATE);
+    }
+
+    public YambaService getService() { return service; }
 
     private void nextPage(Class<?> klass) {
         Intent i = new Intent(this, klass);

@@ -1,5 +1,6 @@
 package com.twitter.university.android.yamba;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -11,12 +12,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.twitter.university.android.yamba.svc.YambaService;
-
 
 public class TweetFragment extends Fragment {
-    private static final String TAG = "TWEET";
-
     private int okColor;
     private int warnColor;
     private int errColor;
@@ -28,6 +25,8 @@ public class TweetFragment extends Fragment {
     private EditText tweetView;
     private TextView countView;
     private View submitButton;
+
+    private TweetActivity activity;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -42,6 +41,12 @@ public class TweetFragment extends Fragment {
         tweetMax = rez.getInteger(R.integer.tweet_max);
         warnMax = rez.getInteger(R.integer.warn_max);
         errMax = rez.getInteger(R.integer.err_max);
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        this.activity = (TweetActivity) activity;
     }
 
     @Override
@@ -78,7 +83,7 @@ public class TweetFragment extends Fragment {
     void updateCount() {
         int n = tweetView.getText().length();
 
-        submitButton.setEnabled(checkTweetLen(n));
+        submitButton.setEnabled(canTweet(n));
 
         n = tweetMax - n;
 
@@ -93,14 +98,14 @@ public class TweetFragment extends Fragment {
 
     void post() {
         String tweet = tweetView.getText().toString();
-        if (!checkTweetLen(tweet.length())) { return; }
+        if (!canTweet(tweet.length())) { return; }
 
         tweetView.setText("");
 
-        YambaService.postTweet(getActivity(), tweet);
+        activity.postTweet(tweet);
     }
 
-    private boolean checkTweetLen(int n) {
-        return (errMax < n) && (tweetMax > n);
+    private boolean canTweet(int n) {
+        return (errMax < n) && (tweetMax > n) && (null != activity.getService());
     }
 }

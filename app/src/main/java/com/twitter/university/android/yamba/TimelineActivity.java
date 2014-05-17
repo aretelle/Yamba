@@ -3,8 +3,12 @@ package com.twitter.university.android.yamba;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
+
+import com.twitter.university.android.yamba.svc.YambaService;
 
 
 public class TimelineActivity extends YambaActivity {
@@ -20,6 +24,13 @@ public class TimelineActivity extends YambaActivity {
     }
 
     @Override
+    public void onServiceConnected(ComponentName comp, IBinder binder) {
+        super.onServiceConnected(comp, binder);
+        YambaService service = getService();
+        if (null != service) { service.startPolling(); }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_timeline);
@@ -27,6 +38,13 @@ public class TimelineActivity extends YambaActivity {
         usingFragments = (null != findViewById(R.id.timeline_details));
 
         if (usingFragments) { addDetailFragment(); }
+    }
+
+    @Override
+    public void onPause() {
+        YambaService service = getService();
+        if (null != service) { service.stopPolling(); }
+        super.onPause();
     }
 
     private void addDetailFragment() {

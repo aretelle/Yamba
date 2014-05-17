@@ -9,8 +9,8 @@ class YambaDbHelper extends SQLiteOpenHelper {
     private static final String DB_FILE = "yamba.db";
     private static final int VERSION = 1;
 
-    public static final String TABLE_TIMELINE = "timeline";
-    public static final String COL_ID = "id";
+    public static final String TABLE_TIMELINE = "p_timeline";
+    public static final String COL_ID = "p_id";
     public static final String COL_TIMESTAMP = "p_timestamp";
     public static final String COL_HANDLE = "p_handle";
     public static final String COL_TWEET = "p_tweet";
@@ -33,7 +33,7 @@ class YambaDbHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldV, int newV) {
-        db.execSQL("DROP TABLE " + TABLE_TIMELINE);
+        db.execSQL("DROP TABLE IF EXISTS" + TABLE_TIMELINE);
         onCreate(db);
     }
 }
