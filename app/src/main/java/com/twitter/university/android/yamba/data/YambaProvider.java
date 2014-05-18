@@ -15,6 +15,11 @@ import java.util.Map;
 
 
 public class YambaProvider extends ContentProvider {
+    public static final String CONSTRAINT_IDS = YambaDbHelper.COL_ID + " in ";
+    public static final String CONSTRAINT_XACT = YambaDbHelper.COL_XACT + "=?";
+    public static final String CONSTRAINT_NEEDS_SYNC
+        = YambaDbHelper.COL_SENT + " is null and " + YambaDbHelper.COL_XACT + " is null";
+
     private static final int MAX_TIMELINE_ITEM_TYPE = 1;
     private static final int TIMELINE_ITEM_TYPE = 2;
     private static final int TIMELINE_DIR_TYPE = 3;
@@ -142,23 +147,32 @@ public class YambaProvider extends ContentProvider {
     @Override
     public Cursor query(Uri uri, String[] proj, String sel, String[] selArgs, String sort) {
 
+        String table;
         long pk = -1;
         Map<String, String> projMap;
         switch (MATCHER.match(uri)) {
             case MAX_TIMELINE_ITEM_TYPE:
                 projMap = PROJ_MAP_MAX_TIMELINE;
+                table = YambaDbHelper.TABLE_TIMELINE;
                 break;
             case TIMELINE_ITEM_TYPE:
                 pk = ContentUris.parseId(uri);
             case TIMELINE_DIR_TYPE:
                 projMap = PROJ_MAP_TIMELINE;
+                table = YambaDbHelper.TABLE_TIMELINE;
+                break;
+            case POST_ITEM_TYPE:
+                pk = ContentUris.parseId(uri);
+            case POST_DIR_TYPE:
+                table = YambaDbHelper.TABLE_POSTS;
+                projMap = PROJ_MAP_POSTS;
                 break;
             default:
                 throw new IllegalArgumentException("Unexpected uri: " + uri);
         }
 
         SQLiteQueryBuilder qb = new SQLiteQueryBuilder();
-        qb.setTables(YambaDbHelper.TABLE_TIMELINE);
+        qb.setTables(table);
 
         qb.setProjectionMap(projMap);
 
@@ -205,7 +219,6 @@ public class YambaProvider extends ContentProvider {
         return count;
     }
 
-
     @Override
     public Uri insert(Uri uri, ContentValues row) {
         switch (MATCHER.match(uri)) {
@@ -229,13 +242,30 @@ public class YambaProvider extends ContentProvider {
     }
 
     @Override
-    public int delete(Uri arg0, String arg1, String[] arg2) {
-        throw new UnsupportedOperationException("delete not supported");
+    public int update(Uri uri, ContentValues row, String sel, String[] selArgs) {
+        switch (MATCHER.match(uri)) {
+            case POST_DIR_TYPE:
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected uri: " + uri);
+        }
+
+        int n = getDb().update(
+            YambaDbHelper.TABLE_POSTS,
+            COL_MAP_POSTS.translateCols(row),
+            sel,
+            selArgs);
+
+        if (0 < n) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return n;
     }
 
     @Override
-    public int update(Uri arg0, ContentValues arg1, String arg2, String[] arg3) {
-        throw new UnsupportedOperationException("update not supported");
+    public int delete(Uri arg0, String arg1, String[] arg2) {
+        throw new UnsupportedOperationException("delete not supported");
     }
 
     private SQLiteDatabase getDb() { return dbHelper.getWritableDatabase(); }
