@@ -15,7 +15,7 @@ public class YambaService extends IntentService {
     private static final String TAG = "SVC";
 
     private static final String PARAM_OP = "YambaService.OP";
-    private static final int OP_POLL = -1;
+    private static final int OP_SYNC = -1;
     private static final int OP_POST = -2;
 
     private static final String PARAM_TWEET = "YambaService.TWEET";
@@ -46,13 +46,17 @@ public class YambaService extends IntentService {
             .cancel(getPollingIntent(ctxt));
     }
 
-    private static PendingIntent getPollingIntent(Context ctxt) {
+    public static Intent getSyncIntent(Context ctxt) {
         Intent i = new Intent(ctxt, YambaService.class);
-        i.putExtra(PARAM_OP, OP_POLL);
+        i.putExtra(PARAM_OP, OP_SYNC);
+        return i;
+    }
+
+    private static PendingIntent getPollingIntent(Context ctxt) {
         return PendingIntent.getService(
             ctxt,
             POLL_REQ,
-            i,
+            getSyncIntent(ctxt),
             PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
@@ -73,8 +77,8 @@ public class YambaService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         int op = intent.getIntExtra(PARAM_OP, 0);
         switch(op) {
-            case OP_POLL:
-                helper.doPoll();
+            case OP_SYNC:
+                helper.doSync();
                 break;
 
             case OP_POST:

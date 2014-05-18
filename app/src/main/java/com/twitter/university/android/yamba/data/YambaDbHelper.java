@@ -7,17 +7,17 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 class YambaDbHelper extends SQLiteOpenHelper {
     private static final String DB_FILE = "yamba.db";
-    private static final int VERSION = 2;
+    private static final int VERSION = 3;
 
-    public static final String TABLE_TIMELINE = "timeline";
+    public static final String TABLE_TIMELINE = "p_timeline";
     public static final String COL_ID = "p_id";
     public static final String COL_TIMESTAMP = "p_timestamp";
     public static final String COL_HANDLE = "p_handle";
     public static final String COL_TWEET = "p_tweet";
 
-    static final String TABLE_POSTS = "p_posts";
-    static final String COL_XACT = "p_xact";
-    static final String COL_SENT = "p_sent";
+    public static final String TABLE_POSTS = "p_posts";
+    public static final String COL_XACT = "p_xact";
+    public static final String COL_SENT = "p_sent";
 
 
     public YambaDbHelper(Context ctxt) {
