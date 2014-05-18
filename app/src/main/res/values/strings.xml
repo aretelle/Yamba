@@ -32,4 +32,7 @@
     <string name="prefs_title_uri">Endpoint</string>
     <string name="prefs_key_uri">PREFS.URI</string>
 
+    <!-- Sync -->
+    <string name="account_type">com.twitter.university.android.yamba.ACCOUNT</string>
+
 </resources>

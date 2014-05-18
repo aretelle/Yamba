@@ -55,6 +55,19 @@
             android:writePermission="com.twitter.university.android.yamba.permission.WRITE" />
 
         <service android:name=".svc.YambaService" />
+
+        <service
+            android:name="com.twitter.university.android.yamba.sync.AccountService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator"/>
+            </intent-filter>
+
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/account"/>
+        </service>
+
     </application>
 
 </manifest>
