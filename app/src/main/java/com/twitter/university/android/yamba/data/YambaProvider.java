@@ -220,28 +220,6 @@ public class YambaProvider extends ContentProvider {
     }
 
     @Override
-    public int update(Uri uri, ContentValues row, String sel, String[] selArgs) {
-        switch (MATCHER.match(uri)) {
-            case POST_DIR_TYPE:
-                break;
-            default:
-                throw new IllegalArgumentException("Unexpected uri: " + uri);
-        }
-
-        int n = getDb().update(
-            YambaDbHelper.TABLE_POSTS,
-            COL_MAP_POSTS.translateCols(row),
-            sel,
-            selArgs);
-
-        if (0 < n) {
-            getContext().getContentResolver().notifyChange(uri, null);
-        }
-
-        return n;
-    }
-
-    @Override
     public Uri insert(Uri uri, ContentValues row) {
         switch (MATCHER.match(uri)) {
             case POST_DIR_TYPE:
@@ -261,6 +239,28 @@ public class YambaProvider extends ContentProvider {
         getContext().getContentResolver().notifyChange(uri, null);
 
         return uri;
+    }
+
+    @Override
+    public int update(Uri uri, ContentValues row, String sel, String[] selArgs) {
+        switch (MATCHER.match(uri)) {
+            case POST_DIR_TYPE:
+                break;
+            default:
+                throw new IllegalArgumentException("Unexpected uri: " + uri);
+        }
+
+        int n = getDb().update(
+            YambaDbHelper.TABLE_POSTS,
+            COL_MAP_POSTS.translateCols(row),
+            sel,
+            selArgs);
+
+        if (0 < n) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
+
+        return n;
     }
 
     @Override

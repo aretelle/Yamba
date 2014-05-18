@@ -68,9 +68,7 @@ public class YambaService extends IntentService {
     @Override
     public void onCreate() {
         super.onCreate();
-        helper = new YambaLogic(
-            (YambaApplication) getApplication(),
-            getResources().getInteger(R.integer.poll_max));
+        helper = new YambaLogic(this);
     }
 
     @Override
@@ -78,7 +76,7 @@ public class YambaService extends IntentService {
         int op = intent.getIntExtra(PARAM_OP, 0);
         switch(op) {
             case OP_SYNC:
-                helper.doSync();
+                helper.doSync(((YambaApplication) this.getApplicationContext()).getClient());
                 break;
 
             case OP_POST:

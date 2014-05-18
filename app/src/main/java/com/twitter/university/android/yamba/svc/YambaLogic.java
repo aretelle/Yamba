@@ -2,6 +2,7 @@ package com.twitter.university.android.yamba.svc;
 
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.database.Cursor;
 import android.text.TextUtils;
 import android.util.Log;
@@ -10,7 +11,7 @@ import com.marakana.android.yamba.clientlib.YambaClient;
 import com.marakana.android.yamba.clientlib.YambaClient.Status;
 import com.marakana.android.yamba.clientlib.YambaClientException;
 import com.twitter.university.android.yamba.BuildConfig;
-import com.twitter.university.android.yamba.YambaApplication;
+import com.twitter.university.android.yamba.R;
 import com.twitter.university.android.yamba.YambaContract;
 import com.twitter.university.android.yamba.data.YambaProvider;
 
@@ -19,30 +20,28 @@ import java.util.List;
 import java.util.UUID;
 
 
-class YambaLogic {
+public class YambaLogic {
     private static final String TAG = "LOGIC";
 
-    private final YambaApplication app;
+    private final Context ctxt;
     private final int maxPolls;
 
-    // Must be called from the UI thread
-    public YambaLogic(final YambaApplication app, int maxPolls) {
-        this.app = app;
-        this.maxPolls = maxPolls;
+    public YambaLogic(Context ctxt) {
+        this.ctxt = ctxt;
+        this.maxPolls = ctxt.getResources().getInteger(R.integer.poll_max);
     }
 
     public void doPost(String tweet) {
         ContentValues cv = new ContentValues();
         cv.put(YambaContract.Posts.Columns.TWEET, tweet);
         cv.put(YambaContract.Posts.Columns.TIMESTAMP, System.currentTimeMillis());
-        app.getContentResolver().insert(YambaContract.Posts.URI, cv);
-        app.startService(YambaService.getSyncIntent(app));
+        ctxt.getContentResolver().insert(YambaContract.Posts.URI, cv);
+        ctxt.startService(YambaService.getSyncIntent(ctxt));
     }
 
-    public void doSync() {
+    public void doSync(YambaClient client) {
         Log.d(TAG, "sync");
 
-        YambaClient client = app.getClient();
         try { postPending(client); }
         catch (Exception e) {
             Log.e(TAG, "Post failed: " + e, e);
@@ -72,7 +71,7 @@ class YambaLogic {
 
         int n = vals.size();
         if (0 >= n) { return 0; }
-        n = app.getContentResolver().bulkInsert(
+        n = ctxt.getContentResolver().bulkInsert(
             YambaContract.Timeline.URI,
             vals.toArray(new ContentValues[n]));
 
@@ -83,7 +82,7 @@ class YambaLogic {
     private long getMaxTimestamp() {
         Cursor c = null;
         try {
-            c = app.getContentResolver().query(
+            c = ctxt.getContentResolver().query(
                 YambaContract.MaxTimeline.URI,
                 null,
                 null,
@@ -99,7 +98,7 @@ class YambaLogic {
     }
 
     private int postPending(YambaClient client) throws YambaClientException {
-        ContentResolver cr = app.getContentResolver();
+        ContentResolver cr = ctxt.getContentResolver();
         String xactId = UUID.randomUUID().toString();
 
         int n = beginUpdate(cr, xactId);

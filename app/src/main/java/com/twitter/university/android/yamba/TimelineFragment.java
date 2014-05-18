@@ -15,8 +15,6 @@ import android.widget.ListView;
 import android.widget.SimpleCursorAdapter;
 import android.widget.TextView;
 
-import com.twitter.university.android.yamba.svc.YambaService;
-
 
 public class TimelineFragment extends ListFragment implements LoaderCallbacks<Cursor> {
     private static final int TIMELINE_LOADER = 666;
@@ -49,12 +47,12 @@ public class TimelineFragment extends ListFragment implements LoaderCallbacks<Cu
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         return new CursorLoader(
-                getActivity(),
-                YambaContract.Timeline.URI,
-                null,
-                null,
-                null,
-                YambaContract.Timeline.Columns.TIMESTAMP + " DESC" );
+            getActivity(),
+            YambaContract.Timeline.URI,
+            null,
+            null,
+            null,
+            YambaContract.Timeline.Columns.TIMESTAMP + " DESC" );
     }
 
     @Override
@@ -72,12 +70,12 @@ public class TimelineFragment extends ListFragment implements LoaderCallbacks<Cu
         View v = super.onCreateView(inflater, root,  state);
 
         SimpleCursorAdapter adapter = new SimpleCursorAdapter(
-                getActivity(),
-                R.layout.row_timeline,
-                null,
-                FROM,
-                TO,
-                0);
+            getActivity(),
+            R.layout.row_timeline,
+            null,
+            FROM,
+            TO,
+            0);
 
         adapter.setViewBinder(new TimelineBinder());
         setListAdapter(adapter);
@@ -85,18 +83,6 @@ public class TimelineFragment extends ListFragment implements LoaderCallbacks<Cu
         getLoaderManager().initLoader(TIMELINE_LOADER, null, this);
 
         return v;
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        YambaService.startPolling(getActivity());
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        YambaService.stopPolling(getActivity());
     }
 
     @Override
