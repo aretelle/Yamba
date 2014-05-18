@@ -18,7 +18,9 @@
         android:targetSdkVersion="19" />
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+
     <uses-permission android:name="com.twitter.university.android.yamba.permission.READ" />
     <uses-permission android:name="com.twitter.university.android.yamba.permission.WRITE" />
 
@@ -44,7 +46,7 @@
             android:name=".TimelineDetailActivity"
             android:label="@string/title_timeline_detail" />
         <activity
-            android:name=".PrefsActivity"
+            android:name=".NewAccountActivity"
             android:theme="@style/yambaPrefs" />
 
         <provider

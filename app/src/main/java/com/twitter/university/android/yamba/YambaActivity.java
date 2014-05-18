@@ -26,10 +26,6 @@ public abstract class YambaActivity extends Activity {
                 nextPage(TimelineActivity.class);
                 break;
 
-            case R.id.menu_prefs:
-                startActivity(new Intent(this, PrefsActivity.class));
-                break;
-
             case R.id.menu_about:
                 about();
                 break;

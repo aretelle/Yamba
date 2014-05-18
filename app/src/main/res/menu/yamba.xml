@@ -10,11 +10,6 @@
         android:showAsAction="always|withText"
         android:title="@string/menu_timeline"/>
     <item
-        android:id="@+id/menu_prefs"
-        android:icon="@android:drawable/ic_menu_preferences"
-        android:showAsAction="ifRoom"
-        android:title="@string/menu_prefs"/>
-    <item
         android:id="@+id/menu_about"
         android:showAsAction="never"
         android:title="@string/menu_about"/>
