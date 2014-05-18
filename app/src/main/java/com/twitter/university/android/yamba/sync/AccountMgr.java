@@ -18,9 +18,15 @@ package com.twitter.university.android.yamba.sync;
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
 import android.accounts.AccountAuthenticatorResponse;
+import android.accounts.AccountManager;
 import android.accounts.NetworkErrorException;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
+import com.twitter.university.android.yamba.BuildConfig;
+import com.twitter.university.android.yamba.NewAccountActivity;
+import com.twitter.university.android.yamba.R;
 import com.twitter.university.android.yamba.YambaApplication;
 
 /**
@@ -28,6 +34,18 @@ import com.twitter.university.android.yamba.YambaApplication;
  * @version $Revision: $
  */
 public class AccountMgr extends AbstractAccountAuthenticator {
+    private static final String TAG = "ACCT";
+
+    public static final String KEY_HANDLE = "YambaAuth.HANDLE";
+    public static final String KEY_ENDPOINT = "YambaAuth.ENDPOINT";
+
+    public static Bundle buildAccountExtras(String handle, String endpoint) {
+        Bundle acctExtras = new Bundle();
+        acctExtras.putString(AccountMgr.KEY_HANDLE, handle);
+        acctExtras.putString(AccountMgr.KEY_ENDPOINT, endpoint);
+        return acctExtras;
+    }
+
     private final YambaApplication app;
 
     public AccountMgr(YambaApplication app) {
@@ -37,13 +55,38 @@ public class AccountMgr extends AbstractAccountAuthenticator {
 
     @Override
     public Bundle addAccount(
-        AccountAuthenticatorResponse accountAuthenticatorResponse,
-        String s,
-        String s2,
-        String[] strings,
-        Bundle bundle) throws NetworkErrorException
+        AccountAuthenticatorResponse resp,
+        String accountType,
+        String authTokenType,
+        String[] requiredFeatures,
+        Bundle options)
+        throws NetworkErrorException
     {
-        throw new UnsupportedOperationException("Update credentials not supported.");
+        if (BuildConfig.DEBUG) { Log.d(TAG, "addAccount"); }
+        Bundle reply = new Bundle();
+
+        String at = app.getString(R.string.account_type);
+
+        if (!at.equals(accountType)) {
+            reply.putInt(AccountManager.KEY_ERROR_CODE, -1);
+            reply.putString(
+                AccountManager.KEY_ERROR_MESSAGE,
+                "Unrecognized account type");
+            return reply;
+        }
+
+        if (0 < AccountManager.get(app).getAccountsByType(at).length) {
+            reply.putInt(AccountManager.KEY_ERROR_CODE, -1);
+            reply.putString(
+                AccountManager.KEY_ERROR_MESSAGE,
+                "Account already exists: please delete before creating a new one");
+            return reply;
+        }
+
+        Intent intent = new Intent(app, NewAccountActivity.class);
+        reply.putParcelable(AccountManager.KEY_INTENT, intent);
+
+        return reply;
     }
 
     @Override
@@ -51,30 +94,33 @@ public class AccountMgr extends AbstractAccountAuthenticator {
         AccountAuthenticatorResponse accountAuthenticatorResponse,
         Account account,
         String s,
-        Bundle bundle) throws NetworkErrorException
+        Bundle bundle)
+        throws NetworkErrorException
     {
-        throw new UnsupportedOperationException("Update credentials not supported.");
+        throw new UnsupportedOperationException("getAuthToken not supported.");
     }
 
     @Override
     public Bundle editProperties(
-        AccountAuthenticatorResponse accountAuthenticatorResponse, String s)
+        AccountAuthenticatorResponse accountAuthenticatorResponse,
+        String s)
     {
-        throw new UnsupportedOperationException("Update credentials not supported.");
+        throw new UnsupportedOperationException("editProperties not supported.");
     }
 
     @Override
     public Bundle confirmCredentials(
         AccountAuthenticatorResponse accountAuthenticatorResponse,
         Account account,
-        Bundle bundle) throws NetworkErrorException
+        Bundle bundle)
+        throws NetworkErrorException
     {
-        throw new UnsupportedOperationException("Update credentials not supported.");
+        throw new UnsupportedOperationException("confirmCredentials not supported.");
     }
 
     @Override
     public String getAuthTokenLabel(String s) {
-        throw new UnsupportedOperationException("Update credentials not supported.");
+        throw new UnsupportedOperationException("getAuthTokenLabel not supported.");
     }
 
     @Override
@@ -82,16 +128,18 @@ public class AccountMgr extends AbstractAccountAuthenticator {
         AccountAuthenticatorResponse accountAuthenticatorResponse,
         Account account,
         String s,
-        Bundle bundle) throws NetworkErrorException
+        Bundle bundle)
+        throws NetworkErrorException
     {
-        throw new UnsupportedOperationException("Update credentials not supported.");
+        throw new UnsupportedOperationException("updateCredentials not supported.");
     }
 
     @Override
     public Bundle hasFeatures(
         AccountAuthenticatorResponse accountAuthenticatorResponse,
         Account account,
-        String[] strings) throws NetworkErrorException
+        String[] strings)
+        throws NetworkErrorException
     {
         throw new UnsupportedOperationException("Update credentials not supported.");
     }
