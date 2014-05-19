@@ -7,8 +7,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="/Volumes/Home/Users/blake/Desktop/AnDevCon/tutorial/Yamba" />
-            <option value="/Volumes/Home/Users/blake/Desktop/AnDevCon/tutorial/Yamba/app" />
+            <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/app" />
           </set>
         </option>
       </GradleProjectSettings>

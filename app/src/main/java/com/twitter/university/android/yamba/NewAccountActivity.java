@@ -22,9 +22,9 @@ import com.twitter.university.android.yamba.sync.AccountMgr;
 public class NewAccountActivity extends AccountAuthenticatorActivity {
     private static final String TAG = "ACCOUNT";
 
-    private static final String DEFAULT_HANDLE = "student";
-    private static final String DEFAULT_PASSWORD = "password";
-    private static final String DEFAULT_ENDPOINT = "http://yamba.marakana.com/api";
+    private static final String DEF_HANDLE = "student";
+    private static final String DEF_PASSWORD = "password";
+    private static final String DEF_ENDPOINT = "http://yamba.marakana.com/api";
 
     private String accountType;
     private int pollInterval;
@@ -69,9 +69,9 @@ public class NewAccountActivity extends AccountAuthenticatorActivity {
         String password,
         String endpoint)
     {
-        if (TextUtils.isEmpty(handle)) { handle = DEFAULT_HANDLE; }
-        if (TextUtils.isEmpty(password)) { password = DEFAULT_PASSWORD; }
-        if (TextUtils.isEmpty(endpoint)) { endpoint = DEFAULT_ENDPOINT; }
+        if (TextUtils.isEmpty(handle)) { handle = DEF_HANDLE; }
+        if (TextUtils.isEmpty(password)) { password = DEF_PASSWORD; }
+        if (TextUtils.isEmpty(endpoint)) { endpoint = DEF_ENDPOINT; }
 
         String acctName = new StringBuilder().append(handle).append("@").append(endpoint).toString();
         if (BuildConfig.DEBUG) {
