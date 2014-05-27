@@ -132,7 +132,7 @@ public class TweetFragment extends Fragment {
 
         tweetView.setText("");
 
-        new Poster((YambaApplication) getActivity().getApplication()).execute();
+        new Poster((YambaApplication) getActivity().getApplication()).execute(tweet);
     }
 
     private boolean checkTweetLen(int n) {
